@@ -20,7 +20,6 @@ Roblox External base for learning.
 
 
 
-
-- Tphandler will be implemented soon.
+tphandler will be implemented soon.
 
 Updated for **version-689e359b09ad43b0**
