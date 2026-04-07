@@ -3,6 +3,9 @@ Roblox External base for learning.
 
 # Features
 
+### Aimbot : 
+- Soon.
+
 ### Visuals : 
 - Boxes
 - Names
