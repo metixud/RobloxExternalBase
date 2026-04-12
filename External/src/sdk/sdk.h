@@ -83,12 +83,22 @@ namespace RBX {
         std::vector<RbxInstance> GetChildList() {
             std::vector<RbxInstance> childList;
 
+            if (Addr == 0) return childList;
+
             uintptr_t childStart = memory->read<uintptr_t>(Addr + Offsets::Instance::ChildrenStart);
+            if (childStart == 0) return childList;
+
             uintptr_t childEnd = memory->read<uintptr_t>(childStart + Offsets::Instance::ChildrenEnd);
+            uintptr_t current = memory->read<uintptr_t>(childStart);
 
+            if (childEnd == 0 || current == 0 || childEnd < current) return childList;
 
-            for (uintptr_t ptr = memory->read<uintptr_t>(childStart); ptr != childEnd; ptr += 0x10) {
+            constexpr size_t maxChildren = 4096;
+            size_t childCount = 0;
+
+            for (uintptr_t ptr = current; ptr < childEnd && childCount < maxChildren; ptr += 0x10, ++childCount) {
                 uintptr_t childAddr = memory->read<uintptr_t>(ptr);
+                if (childAddr == 0) continue;
                 childList.emplace_back(childAddr);
             }
 
