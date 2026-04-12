@@ -17,6 +17,13 @@ namespace Visuals {
         drawList->AddText(pos, textColor, text.c_str());
     }
 
+    inline void DrawLine(ImDrawList* drawList, const ImVec2& start, const ImVec2& end, ImU32 color, float thickness, bool outline) {
+        if (outline) {
+            drawList->AddLine(start, end, IM_COL32(0, 0, 0, 255), thickness + 2.0f);
+        }
+        drawList->AddLine(start, end, color, thickness);
+    }
+
     inline void RenderESP(ImDrawList* drawList, const RBX::Mat4& viewMatrix)
     {
         if (!variables::ESP::enabled) return;
@@ -357,6 +364,146 @@ namespace Visuals {
                 float textX = (minX + maxX) / 2.0f - textSize.x / 2.0f;
                 float textY = maxY + 2;
                 DrawOutlinedText(drawList, ImVec2(textX, textY), distText, IM_COL32(255, 255, 255, 255));
+            }
+
+            if (variables::ESP::snaplines) {
+                ImU32 color = IM_COL32(255, 255, 255, 255);
+                ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+                ImVec2 origin_pos, destination_pos;
+
+                switch (variables::ESP::snaplinesOrigin) {
+                case 0: {
+                    POINT cursorPos;
+                    if (GetCursorPos(&cursorPos)) {
+                        HWND hwnd = GetForegroundWindow();
+                        if (ScreenToClient(hwnd, &cursorPos)) {
+                            origin_pos = ImVec2((float)cursorPos.x, (float)cursorPos.y);
+                        } else {
+                            origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y);
+                        }
+                    } else {
+                        origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y);
+                    }
+                    break;
+                }
+                case 1: origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y * 0.5f); break;
+                case 2: origin_pos = ImVec2(screenSize.x * 0.5f, 0.f); break;
+                case 3: origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y); break;
+                case 4: {
+                    auto localChar = RBX::RbxInstance(Globals::localPlayer.GetModelRef());
+                    auto localHead = localChar.FindChild("Head");
+                    if (localHead.Addr != 0) {
+                        auto headPos = W2S::WorldToScreen(localHead.GetPos(), viewMatrix);
+                        origin_pos = ImVec2(headPos.X, headPos.Y);
+                    } else {
+                        origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y);
+                    }
+                    break;
+                }
+                case 5: {
+                    auto localChar = RBX::RbxInstance(Globals::localPlayer.GetModelRef());
+                    auto localHRP = localChar.FindChild("HumanoidRootPart");
+                    if (localHRP.Addr != 0) {
+                        auto hrpPos = W2S::WorldToScreen(localHRP.GetPos(), viewMatrix);
+                        origin_pos = ImVec2(hrpPos.X, hrpPos.Y);
+                    } else {
+                        origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y);
+                    }
+                    break;
+                }
+                default: origin_pos = ImVec2(screenSize.x * 0.5f, screenSize.y); break;
+                }
+
+                switch (variables::ESP::snaplinesDestination) {
+                case 0: {
+                    auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
+                    destination_pos = ImVec2(headPos.X, headPos.Y);
+                    break;
+                }
+                case 1: {
+                    auto hrp = character.FindChild("HumanoidRootPart");
+                    if (hrp.Addr != 0) {
+                        auto hrpPos = W2S::WorldToScreen(hrp.GetPos(), viewMatrix);
+                        destination_pos = ImVec2(hrpPos.X, hrpPos.Y);
+                    } else {
+                        auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
+                        destination_pos = ImVec2(headPos.X, headPos.Y);
+                    }
+                    break;
+                }
+                case 2: {
+                    ImVec2 best = ImVec2((minX + maxX) * 0.5f, (minY + maxY) * 0.5f);
+                    float closest = FLT_MAX;
+                    
+                    auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
+                    ImVec2 headScreen = ImVec2(headPos.X, headPos.Y);
+                    auto delta = ImVec2(origin_pos.x - headScreen.x, origin_pos.y - headScreen.y);
+                    float distance = delta.x * delta.x + delta.y * delta.y;
+                    if (distance < closest) {
+                        closest = distance;
+                        best = headScreen;
+                    }
+
+                    if (torso.Addr != 0) {
+                        auto torsoPos = W2S::WorldToScreen(torso.GetPos(), viewMatrix);
+                        ImVec2 torsoScreen = ImVec2(torsoPos.X, torsoPos.Y);
+                        delta = ImVec2(origin_pos.x - torsoScreen.x, origin_pos.y - torsoScreen.y);
+                        distance = delta.x * delta.x + delta.y * delta.y;
+                        if (distance < closest) {
+                            closest = distance;
+                            best = torsoScreen;
+                        }
+                    }
+
+                    destination_pos = best;
+                    break;
+                }
+                default: {
+                    auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
+                    destination_pos = ImVec2(headPos.X, headPos.Y);
+                    break;
+                }
+                }
+
+                switch (variables::ESP::snaplinesStyle) {
+                case 0: {
+                    DrawLine(drawList, origin_pos, destination_pos, color, variables::ESP::snaplinesThickness, variables::ESP::snaplinesOutline);
+                    break;
+                }
+                case 1: {
+                    auto drop = 180.f;
+                    auto segments = 24;
+                    ImVec2 prev = origin_pos;
+                    auto control = ImVec2(
+                        (origin_pos.x + destination_pos.x) * 0.5f,
+                        (origin_pos.y + destination_pos.y) * 0.5f + drop
+                    );
+                    for (auto i = 1; i <= segments; ++i) {
+                        auto t = (float)(i) / segments;
+                        auto it = 1.0f - t;
+                        ImVec2 point;
+                        point.x = it * it * origin_pos.x + 2 * it * t * control.x + t * t * destination_pos.x;
+                        point.y = it * it * origin_pos.y + 2 * it * t * control.y + t * t * destination_pos.y;
+                        DrawLine(drawList, prev, point, color, variables::ESP::snaplinesThickness, variables::ESP::snaplinesOutline);
+                        prev = point;
+                    }
+                    break;
+                }
+                case 2: {
+                    auto delta = ImVec2(destination_pos.x - origin_pos.x, destination_pos.y - origin_pos.y);
+                    auto length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+                    auto dir = ImVec2(delta.x / length, delta.y / length);
+                    auto dash_len = length / (10 * 2.f);
+                    for (auto i = 0; i < 10; ++i) {
+                        auto start = i * 2.f * dash_len;
+                        auto end = start + dash_len;
+                        auto s = ImVec2(origin_pos.x + dir.x * start, origin_pos.y + dir.y * start);
+                        auto e = ImVec2(origin_pos.x + dir.x * end, origin_pos.y + dir.y * end);
+                        DrawLine(drawList, s, e, color, variables::ESP::snaplinesThickness, variables::ESP::snaplinesOutline);
+                    }
+                    break;
+                }
+                }
             }
         }
     }
