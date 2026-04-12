@@ -10,6 +10,7 @@
 #include "src/sdk/sdk.h"
 #include "src/core/cache/cache.h"
 #include "src/core/globals/globals.h"
+#include "src/core/tp_handler/tp_handler.h"
 #include "src/core/features/visuals/visuals.h"
 #include "src/core/features/aimbot/aimbot.h"
 #include "src/render/render.h"
@@ -19,8 +20,6 @@ namespace
 	constexpr const char* app = "RobloxPlayerBeta.exe";
 	constexpr const wchar_t* apptitle = L"Roblox";
 
-	std::atomic<bool> running(true);
-
 	bool isgamerunning(const wchar_t* windowTitle)
 	{
 		HWND hwnd = FindWindowW(NULL, windowTitle);
@@ -29,7 +28,7 @@ namespace
 
 	void thread()
 	{
-		while (running) {
+		while (Globals::running) {
 			auto character = Globals::localPlayer.GetModelRef();
 			if (character.Addr == 0) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -99,7 +98,7 @@ namespace
 			printf("fake datamodel pointer is null.");
 			return false;
 		}
-
+	   
 		auto dataModelAddr = fakeDataModel + Offsets::FakeDataModel::RealDataModel;
 		auto dataModelPtr = memory->read<uintptr_t>(dataModelAddr);
 		if (!dataModelPtr) {
@@ -145,7 +144,6 @@ std::int32_t main()
 		return 1;
 	}
 
-
 	OverlayWindow overlay;
 	if (!overlay.Initialize()) {
 		std::cout << "[!] failed to initialize overlay\n";
@@ -155,17 +153,23 @@ std::int32_t main()
 	std::cout << "[+] overlay initialized\n";
 	std::cout << "[*] press insert to toggle menu\n\n";
 
+	std::thread tpThread(Core::tp_handler::thread);
     std::thread localThread(thread);
     int frameCounter = 0;
 
-    while (memory->IsConnected()) {
+    while (memory->IsConnected() && Globals::running) {
         if (!isgamerunning(apptitle)) {
             break;
         }
 
-        if (GetAsyncKeyState(VK_INSERT) & 1) {
+		if (GetAsyncKeyState(VK_INSERT) & 1) { // 0x2D
             variables::menuOpen = !variables::menuOpen;
         }
+
+		if (Globals::renderEngine.Addr == 0 || Globals::players.Addr == 0 || Globals::localPlayer.Addr == 0) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
 
         if (frameCounter % 3 == 0) {
             PlayerCache::updateplayers();
@@ -186,7 +190,10 @@ std::int32_t main()
         overlay.EndFrame();
     }
 
-    running = false;
+    Globals::running = false;
+    if (tpThread.joinable()) {
+        tpThread.join();
+    }
     if (localThread.joinable()) {
         localThread.join();
     }
