@@ -11,6 +11,7 @@
 #include "src/core/cache/cache.h"
 #include "src/core/globals/globals.h"
 #include "src/core/features/visuals/visuals.h"
+#include "src/core/features/aimbot/aimbot.h"
 #include "src/render/render.h"
 
 namespace
@@ -49,6 +50,20 @@ namespace
 				RBX::ModifyJumpPower(humanoid, variables::Local::jumpPower);
 			}
 
+			static bool lastDesyncState = false;
+			if (variables::Local::desyncEnabled != lastDesyncState) {
+				auto baseAddr = memory->get_module_address();
+				if (baseAddr) {
+					auto desyncAddr = baseAddr + Offsets::Desync::PhysicsSenderMaxBandwidthBps;
+					if (variables::Local::desyncEnabled) {
+						memory->write<float>(desyncAddr, 0.0f);
+					} else {
+						memory->write<float>(desyncAddr, 5.431432847722991e-41f);
+					}
+					lastDesyncState = variables::Local::desyncEnabled;
+				}
+			}
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		}
 	}
@@ -56,7 +71,9 @@ namespace
 	bool init()
 	{
 		if (!memory->find_process_id(app)) {
-			printf("unable to get pid.");
+			printf("unable to get pid. \n");
+			printf("make sure to launch roblox ig. \n");
+			system("pause");
 			return false;
 		}
 
@@ -117,40 +134,13 @@ namespace
 
 		return true;
 	}
-
-	void render(ImDrawList* drawList)
-	{
-		static auto lastTime = std::chrono::high_resolution_clock::now();
-		static int frameCount = 0;
-		static int fps = 0;
-
-		frameCount++;
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
-
-		if (elapsed >= 1000) {
-			fps = frameCount;
-			frameCount = 0;
-			lastTime = currentTime;
-		}
-
-		std::string watermark = "Made by Metix | Roblox External | FPS: " + std::to_string(fps);
-		ImVec2 textSize = ImGui::CalcTextSize(watermark.c_str());
-		float screenW = static_cast<float>(GetSystemMetrics(SM_CXSCREEN));
-		ImVec2 watermarkPos = ImVec2(screenW - textSize.x - 10, 10);
-
-		drawList->AddText(ImVec2(watermarkPos.x - 1, watermarkPos.y), IM_COL32(0, 0, 0, 255), watermark.c_str());
-		drawList->AddText(ImVec2(watermarkPos.x + 1, watermarkPos.y), IM_COL32(0, 0, 0, 255), watermark.c_str());
-		drawList->AddText(ImVec2(watermarkPos.x, watermarkPos.y - 1), IM_COL32(0, 0, 0, 255), watermark.c_str());
-		drawList->AddText(ImVec2(watermarkPos.x, watermarkPos.y + 1), IM_COL32(0, 0, 0, 255), watermark.c_str());
-		drawList->AddText(watermarkPos, IM_COL32(255, 255, 255, 255), watermark.c_str());
-	}
 }
 
 
 std::int32_t main() 
 {
 	SetConsoleTitleA("sexy");
+
 	if (!init()) {
 		return 1;
 	}
@@ -186,9 +176,11 @@ std::int32_t main()
         overlay.RenderMenu();
 
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        render(drawList);
+        overlay.render(drawList);
 
         auto viewMatrix = Globals::renderEngine.GetViewMat();
+		// ud run
+		Aimbot::RunAimbot(viewMatrix);
         Visuals::RenderESP(drawList, viewMatrix);
 
         overlay.EndFrame();
