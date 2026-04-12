@@ -201,7 +201,42 @@ public:
         ImGui::BeginChild("Content", ImVec2(0, 0), true);
 
         if (variables::selectedTab == 0) {
-            ImGui::Text("Soon..");
+            ImGui::Text("Aimbot");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Enable Aimbot", &variables::Aimbot::enabled);
+            ImGui::Checkbox("Show FOV", &variables::Aimbot::showFOV);
+
+            ImGui::Spacing();
+            ImGui::Text("FOV Radius");
+            ImGui::SliderFloat("##FOV", &variables::Aimbot::fovRadius, 10.0f, 500.0f, "%.0f");
+
+            ImGui::Text("Smoothing");
+            ImGui::SliderFloat("##Smoothing", &variables::Aimbot::smoothing, 1.0f, 20.0f, "%.1f");
+
+            ImGui::Spacing();
+            ImGui::Text("Aim Target");
+            const char* targets[] = { "Head", "HumanoidRootPart" };
+            ImGui::Combo("##Target", &variables::Aimbot::aimTarget, targets, 2);
+
+            ImGui::Spacing();
+            ImGui::Text("Aimbot Keybind");
+            const char* keys[] = { "None", "Left Mouse", "Right Mouse", "Middle Mouse", "X1 Mouse", "X2 Mouse",
+                                   "Shift", "Ctrl", "Alt", "C", "V", "X", "Z", "Q", "E", "R", "T", "F", "G" };
+            const int keyValues[] = { 0, 1, 2, 4, 5, 6, 16, 17, 18, 0x43, 0x56, 0x58, 0x5A, 0x51, 0x45, 0x52, 0x54, 0x46, 0x47 };
+
+            int currentKeyIndex = 0;
+            for (int i = 0; i < 19; i++) {
+                if (keyValues[i] == variables::Aimbot::aimbotKey) {
+                    currentKeyIndex = i;
+                    break;
+                }
+            }
+
+            if (ImGui::Combo("##Keybind", &currentKeyIndex, keys, 19)) {
+                variables::Aimbot::aimbotKey = keyValues[currentKeyIndex];
+            }
         }
         else if (variables::selectedTab == 1) {
             ImGui::Text("Visuals");
@@ -214,9 +249,35 @@ public:
 
             ImGui::Checkbox("Distance", &variables::ESP::distance);
             ImGui::Checkbox("Health Bar", &variables::ESP::healthBar);
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            
+            ImGui::Checkbox("Snaplines", &variables::ESP::snaplines);
+            
+            if (variables::ESP::snaplines) {
+                ImGui::Spacing();
+                ImGui::Text("Origin");
+                const char* origins[] = { "Cursor", "Center", "Top", "Bottom", "Local Head", "Local HRP" };
+                ImGui::Combo("##SnaplinesOrigin", &variables::ESP::snaplinesOrigin, origins, 6);
+                
+                ImGui::Text("Destination");
+                const char* destinations[] = { "Head", "HumanoidRootPart", "Closest Part" };
+                ImGui::Combo("##SnaplinesDestination", &variables::ESP::snaplinesDestination, destinations, 3);
+                
+                ImGui::Text("Style");
+                const char* styles[] = { "Straight", "Curved", "Dashed" };
+                ImGui::Combo("##SnaplinesStyle", &variables::ESP::snaplinesStyle, styles, 3);
+                
+                ImGui::Text("Thickness");
+                ImGui::SliderFloat("##SnaplinesThickness", &variables::ESP::snaplinesThickness, 0.5f, 5.0f, "%.1f");
+                
+                ImGui::Checkbox("Outline", &variables::ESP::snaplinesOutline);
+            }
         }
         else if (variables::selectedTab == 2) {
-            ImGui::Text("Local");
+            ImGui::Text("Exploits");
             ImGui::Separator();
             ImGui::Spacing();
             ImGui::Checkbox("WalkSpeed", &variables::Local::speedEnabled);
@@ -225,13 +286,53 @@ public:
             ImGui::Spacing();
             ImGui::Checkbox("JumpPower", &variables::Local::jumpEnabled);
             ImGui::SliderFloat("##JumpPower", &variables::Local::jumpPower, 50.0f, 200.0f, "%.0f");
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Checkbox("Desync", &variables::Local::desyncEnabled);
         }
 
         ImGui::EndChild();
 
         ImGui::End();
     }
+    void render(ImDrawList* drawList)
+    {
+        static auto lastTime = std::chrono::high_resolution_clock::now();
+        static int frameCount = 0;
+        static int fps = 0;
 
+        frameCount++;
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count();
+
+        if (elapsed >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+
+        std::string watermark = "Made by Metix | Roblox External | FPS: " + std::to_string(fps);
+        ImVec2 textSize = ImGui::CalcTextSize(watermark.c_str());
+        float screenW = static_cast<float>(GetSystemMetrics(SM_CXSCREEN));
+        ImVec2 watermarkPos = ImVec2(screenW - textSize.x - 10, 10);
+
+        drawList->AddText(ImVec2(watermarkPos.x - 1, watermarkPos.y), IM_COL32(0, 0, 0, 255), watermark.c_str());
+        drawList->AddText(ImVec2(watermarkPos.x + 1, watermarkPos.y), IM_COL32(0, 0, 0, 255), watermark.c_str());
+        drawList->AddText(ImVec2(watermarkPos.x, watermarkPos.y - 1), IM_COL32(0, 0, 0, 255), watermark.c_str());
+        drawList->AddText(ImVec2(watermarkPos.x, watermarkPos.y + 1), IM_COL32(0, 0, 0, 255), watermark.c_str());
+        drawList->AddText(watermarkPos, IM_COL32(255, 255, 255, 255), watermark.c_str());
+
+        if (variables::Aimbot::enabled && variables::Aimbot::showFOV) {
+            POINT p;
+            GetCursorPos(&p);
+            ImVec2 center = ImVec2(static_cast<float>(p.x), static_cast<float>(p.y));
+            drawList->AddCircle(center, variables::Aimbot::fovRadius, IM_COL32(0, 0, 0, 255), 64, 2.0f);
+            drawList->AddCircle(center, variables::Aimbot::fovRadius, IM_COL32(255, 255, 255, 255), 64, 1.0f);
+        }
+
+    }
     void EndFrame() {
         ImGui::Render();
 
