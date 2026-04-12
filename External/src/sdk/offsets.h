@@ -599,4 +599,8 @@ namespace Offsets {
          inline constexpr uintptr_t worldStepsPerSec = 0x668;
     }
 
+    namespace Desync {
+         inline constexpr uintptr_t PhysicsSenderMaxBandwidthBps = 0x6eafe0c;
+    }
+
 }
