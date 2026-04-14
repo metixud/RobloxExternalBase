@@ -6,6 +6,10 @@
 #include "../../ext/imgui/imgui_impl_win32.h"
 #include "../../ext/imgui/imgui_impl_dx11.h"
 #include "../../src/core/variables/variables.h"
+#include "../../src/core/globals/globals.h"
+#include "../../src/memory/memory.h"
+#include "../../src/sdk/offsets.h"
+#include "../../src/sdk/structs.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -283,9 +287,46 @@ public:
             ImGui::Checkbox("WalkSpeed", &variables::Local::speedEnabled);
             ImGui::SliderFloat("##WalkSpeed", &variables::Local::walkSpeed, 16.0f, 200.0f, "%.0f");
 
+            float currentspeed = 0.0f;
+            bool hascurrentspeed = false;
+            auto localCharacter = Globals::localPlayer.GetModelRef();
+            if (localCharacter.Addr != 0) {
+                auto humanoid = localCharacter.FindChildByClass("Humanoid");
+                if (humanoid.Addr != 0) {
+                    auto humanoidData = memory->read<Structs::Humanoid>(humanoid.Addr);
+                    currentspeed = humanoidData.Walkspeed;
+                    hascurrentspeed = true;
+                }
+            }
+
+            if (hascurrentspeed) {
+                ImGui::Text("Current WalkSpeed: %.2f", currentspeed);
+            }
+            else {
+                ImGui::Text("Current WalkSpeed: N/A");
+            }
+
             ImGui::Spacing();
             ImGui::Checkbox("JumpPower", &variables::Local::jumpEnabled);
             ImGui::SliderFloat("##JumpPower", &variables::Local::jumpPower, 50.0f, 200.0f, "%.0f");
+
+            float currentjump = 0.0f;
+            bool hascurrentjump = false;
+            if (localCharacter.Addr != 0) {
+                auto humanoid = localCharacter.FindChildByClass("Humanoid");
+                if (humanoid.Addr != 0) {
+                    auto humanoidData = memory->read<Structs::Humanoid>(humanoid.Addr);
+                    currentjump = humanoidData.JumpPower;
+                    hascurrentjump = true;
+                }
+            }
+
+            if (hascurrentjump) {
+                ImGui::Text("Current JumpPower: %.2f", currentjump);
+            }
+            else {
+                ImGui::Text("Current JumpPower: N/A");
+            }
             
             ImGui::Spacing();
             ImGui::Separator();
