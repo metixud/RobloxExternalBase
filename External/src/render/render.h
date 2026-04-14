@@ -287,22 +287,13 @@ public:
             ImGui::Checkbox("WalkSpeed", &variables::Local::speedEnabled);
             ImGui::SliderFloat("##WalkSpeed", &variables::Local::walkSpeed, 16.0f, 200.0f, "%.0f");
 
-            float currentspeed = 0.0f;
-            bool hascurrentspeed = false;
             auto localCharacter = Globals::localPlayer.GetModelRef();
-            if (localCharacter.Addr != 0) {
-                auto humanoid = localCharacter.FindChildByClass("Humanoid");
-                if (humanoid.Addr != 0) {
-                    auto humanoidData = memory->read<Structs::Humanoid>(humanoid.Addr);
-                    currentspeed = humanoidData.Walkspeed;
-                    hascurrentspeed = true;
-                }
-            }
-
-            if (hascurrentspeed) {
-                ImGui::Text("Current WalkSpeed: %.2f", currentspeed);
-            }
-            else {
+            auto humanoid = localCharacter.Addr != 0 ? localCharacter.FindChildByClass("Humanoid") : RBX::RbxInstance(0);
+            
+            if (humanoid.Addr != 0) {
+                auto data = memory->read<Structs::Humanoid>(humanoid.Addr);
+                ImGui::Text("Current WalkSpeed: %.2f", data.Walkspeed);
+            } else {
                 ImGui::Text("Current WalkSpeed: N/A");
             }
 
@@ -310,21 +301,10 @@ public:
             ImGui::Checkbox("JumpPower", &variables::Local::jumpEnabled);
             ImGui::SliderFloat("##JumpPower", &variables::Local::jumpPower, 50.0f, 200.0f, "%.0f");
 
-            float currentjump = 0.0f;
-            bool hascurrentjump = false;
-            if (localCharacter.Addr != 0) {
-                auto humanoid = localCharacter.FindChildByClass("Humanoid");
-                if (humanoid.Addr != 0) {
-                    auto humanoidData = memory->read<Structs::Humanoid>(humanoid.Addr);
-                    currentjump = humanoidData.JumpPower;
-                    hascurrentjump = true;
-                }
-            }
-
-            if (hascurrentjump) {
-                ImGui::Text("Current JumpPower: %.2f", currentjump);
-            }
-            else {
+            if (humanoid.Addr != 0) {
+                auto data = memory->read<Structs::Humanoid>(humanoid.Addr);
+                ImGui::Text("Current JumpPower: %.2f", data.JumpPower);
+            } else {
                 ImGui::Text("Current JumpPower: N/A");
             }
             
