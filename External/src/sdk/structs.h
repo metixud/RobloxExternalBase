@@ -66,5 +66,5 @@ namespace Structs {
         int HumanoidState;
         char pad_16[123];
         bool IsWalking;
-    }; // sizeof = 2328 // big size nah?
+    }; // sizeof = 2328
 }
