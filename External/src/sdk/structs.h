@@ -10,7 +10,7 @@ using ViewMatrix_t = rbx::matrix4_t;
 
 // trust ud!
 namespace Structs {
-    inline std::string ClientVersion = "version-26c90be22e0d4758";
+    inline std::string ClientVersion = "version-9d412f44a6fe4081";
 
     struct Humanoid {
         char pad_0[32];
