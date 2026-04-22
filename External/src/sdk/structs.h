@@ -11,8 +11,7 @@ using ViewMatrix_t = rbx::matrix4_t;
 // trust ud!
 namespace Structs {
     inline std::string ClientVersion = "version-9d412f44a6fe4081";
-
-    struct Humanoid {
+  struct Humanoid {
         char pad_0[32];
         int HumanoidStateID;
         char pad_1[252];
