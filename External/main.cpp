@@ -13,6 +13,7 @@
 #include "src/core/tp_handler/tp_handler.h"
 #include "src/core/features/visuals/visuals.h"
 #include "src/core/features/aimbot/aimbot.h"
+#include "src/core/features/exploits/exploits.h"
 #include "src/render/render.h"
 
 namespace
@@ -56,7 +57,8 @@ namespace
 					auto desyncAddr = baseAddr + Offsets::Desync::PhysicsSenderMaxBandwidthBps;
 					if (variables::Local::desyncEnabled) {
 						memory->write<float>(desyncAddr, 0.0f);
-					} else {
+					}
+					else {
 						memory->write<float>(desyncAddr, 5.431432847722991e-41f);
 					}
 					lastDesyncState = variables::Local::desyncEnabled;
@@ -98,7 +100,7 @@ namespace
 			printf("fake datamodel pointer is null.");
 			return false;
 		}
-	   
+
 		auto dataModelAddr = fakeDataModel + Offsets::FakeDataModel::RealDataModel;
 		auto dataModelPtr = memory->read<uintptr_t>(dataModelAddr);
 		if (!dataModelPtr) {
@@ -136,7 +138,7 @@ namespace
 }
 
 
-std::int32_t main() 
+std::int32_t main()
 {
 	SetConsoleTitleA("sexy");
 
@@ -154,50 +156,54 @@ std::int32_t main()
 	std::cout << "[*] press insert to toggle menu\n\n";
 
 	std::thread tpThread(Core::tp_handler::thread);
-    std::thread localThread(thread);
-    int frameCounter = 0;
+	std::thread localThread(thread);
+	std::thread animThread(animation_changer);
+	int frameCounter = 0;
 
-    while (memory->IsConnected() && Globals::running) {
-        if (!isgamerunning(apptitle)) {
-            break;
-        }
+	while (memory->IsConnected() && Globals::running) {
+		if (!isgamerunning(apptitle)) {
+			break;
+		}
 
 		if (GetAsyncKeyState(VK_INSERT) & 1) { // 0x2D
-            variables::menuOpen = !variables::menuOpen;
-        }
+			variables::menuOpen = !variables::menuOpen;
+		}
 
 		if (Globals::renderEngine.Addr == 0 || Globals::players.Addr == 0 || Globals::localPlayer.Addr == 0) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			continue;
 		}
 
-        if (frameCounter % 3 == 0) {
-            PlayerCache::updateplayers();
-        }
-        frameCounter++;
+		if (frameCounter % 3 == 0) {
+			PlayerCache::updateplayers();
+		}
+		frameCounter++;
 
-        overlay.BeginFrame();
-        overlay.RenderMenu();
+		overlay.BeginFrame();
+		overlay.RenderMenu();
 
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        overlay.render(drawList);
+		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+		overlay.render(drawList);
 
-        auto viewMatrix = Globals::renderEngine.GetViewMat();
+		auto viewMatrix = Globals::renderEngine.GetViewMat();
 		// ud run
 		Aimbot::RunAimbot(viewMatrix);
-        Visuals::RenderESP(drawList, viewMatrix);
+		Visuals::RenderESP(drawList, viewMatrix);
 
-        overlay.EndFrame();
-    }
+		overlay.EndFrame();
+	}
 
-    Globals::running = false;
-    if (tpThread.joinable()) {
-        tpThread.join();
-    }
-    if (localThread.joinable()) {
-        localThread.join();
-    }
+	Globals::running = false;
+	if (tpThread.joinable()) {
+		tpThread.join();
+	}
+	if (localThread.joinable()) {
+		localThread.join();
+	}
+	if (animThread.joinable()) {
+		animThread.detach();
+	}
 
-    overlay.Cleanup();
-    return 0;
+	overlay.Cleanup();
+	return 0;
 }
