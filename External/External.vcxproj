@@ -27,6 +27,7 @@
     <ClCompile Include="ext\imgui\imgui_tables.cpp" />
     <ClCompile Include="ext\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\core\features\exploits\exploits.cpp" />
     <ClCompile Include="src\core\tp_handler\tp_handler.cpp" />
     <ClCompile Include="src\memory\memory.cpp" />
   </ItemGroup>
@@ -43,6 +44,7 @@
     <ClInclude Include="ext\imgui\imstb_textedit.h" />
     <ClInclude Include="ext\imgui\imstb_truetype.h" />
     <ClInclude Include="src\core\cache\cache.h" />
+    <ClInclude Include="src\core\features\exploits\exploits.h" />
     <ClInclude Include="src\core\features\visuals\visuals.h" />
     <ClInclude Include="src\core\globals\globals.h" />
     <ClInclude Include="src\core\tp_handler\tp_handler.h" />
@@ -158,7 +160,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\ud\source\repos\External\External\ext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;C:\Users\ud\source\repos\External\External\ext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
