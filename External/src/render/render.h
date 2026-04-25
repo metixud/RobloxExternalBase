@@ -198,6 +198,7 @@ public:
             if (ImGui::Button("Local", buttonSize)) variables::selectedTab = 2;
         }
 
+
         ImGui::EndChild();
 
         ImGui::SameLine();
@@ -281,7 +282,7 @@ public:
             }
         }
         else if (variables::selectedTab == 2) {
-            ImGui::Text("Exploits");
+            ImGui::Text("Local");
             ImGui::Separator();
             ImGui::Spacing();
             ImGui::Checkbox("WalkSpeed", &variables::Local::speedEnabled);
@@ -312,6 +313,63 @@ public:
             ImGui::Separator();
             ImGui::Spacing();
             ImGui::Checkbox("Desync", &variables::Local::desyncEnabled);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Animation Changer", &variables::Exploits::animation_changer);
+
+            if (variables::Exploits::animation_changer) {
+                ImGui::Text("Animations Changer");
+
+                static const char* idle_anims[] = {
+                    "Default Idle 1", "Default Idle 2", "Zombie Idle 1", "Zombie Idle 2",
+                    "Ninja Idle 1", "Ninja Idle 2", "Robot Idle 1", "Robot Idle 2",
+                    "Levitation Idle 1", "Levitation Idle 2", "Stylish Idle 1", "Stylish Idle 2",
+                    "Cartoony Idle 1", "Cartoony Idle 2", "Super Hero Idle 1", "Super Hero Idle 2",
+                    "Elder Idle 1", "Elder Idle 2", "Toy Idle 1", "Toy Idle 2", "Old School Idle 1", "Old School Idle 2", "Mage Idle"
+                };
+                ImGui::Combo("Idle Animation", &variables::Exploits::idle_animation, idle_anims, IM_ARRAYSIZE(idle_anims));
+
+                static const char* run_anims[] = {
+                    "Default Run", "Zombie Run", "Ninja Run", "Robot Run",
+                    "Levitation Run", "Stylish Run", "Cartoony Run", "Super Hero Run",
+                    "Elder Run", "Toy Run", "Old School Run", "Mage Run"
+                };
+                ImGui::Combo("Run Animation", &variables::Exploits::run_animation, run_anims, IM_ARRAYSIZE(run_anims));
+
+                static const char* walk_anims[] = {
+                    "Default Walk", "Zombie Walk", "Ninja Walk", "Robot Walk",
+                    "Levitation Walk", "Stylish Walk", "Cartoony Walk", "Super Hero Walk",
+                    "Elder Walk", "Toy Walk", "Old School Walk", "Mage Walk"
+                };
+                ImGui::Combo("Walk Animation", &variables::Exploits::walk_animation, walk_anims, IM_ARRAYSIZE(walk_anims));
+
+                static const char* jump_anims[] = {
+                    "Default Jump", "Zombie Jump", "Ninja Jump", "Robot Jump",
+                    "Levitation Jump", "Stylish Jump", "Cartoony Jump", "Super Hero Jump",
+                    "Elder Jump", "Toy Jump", "Old School Jump", "Mage Jump"
+                };
+                ImGui::Combo("Jump Animation", &variables::Exploits::jump_animation, jump_anims, IM_ARRAYSIZE(jump_anims));
+
+                static const char* fall_anims[] = {
+                    "Default Fall", "Zombie Fall", "Ninja Fall", "Robot Fall",
+                    "Levitation Fall", "Stylish Fall", "Cartoony Fall", "Super Hero Fall",
+                    "Elder Fall", "Toy Fall", "Old School Fall", "Mage Fall"
+                };
+                ImGui::Combo("Fall Animation", &variables::Exploits::fall_animation, fall_anims, IM_ARRAYSIZE(fall_anims));
+
+                static const char* climb_anims[] = {
+                    "Default Climb", "Zombie Climb", "Ninja Climb", "Robot Climb", "Levitation Climb"
+                };
+                ImGui::Combo("Climb Animation", &variables::Exploits::climb_animation, climb_anims, IM_ARRAYSIZE(climb_anims));
+
+                static const char* swim_anims[] = {
+                    "Default Swim", "Zombie Swim", "Ninja Swim", "Robot Swim", "Levitation Swim"
+                };
+                ImGui::Combo("Swim Animation", &variables::Exploits::swim_animation, swim_anims, IM_ARRAYSIZE(swim_anims));
+            }
         }
 
         ImGui::EndChild();
