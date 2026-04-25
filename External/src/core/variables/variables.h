@@ -28,6 +28,17 @@ namespace variables {
         inline bool snaplinesOutline = true;
     }
 
+    namespace Exploits {
+        inline bool animation_changer = false;
+        inline int idle_animation = 0;
+        inline int run_animation = 0;
+        inline int walk_animation = 0;
+        inline int jump_animation = 0;
+        inline int fall_animation = 0;
+        inline int climb_animation = 0;
+        inline int swim_animation = 0;
+    }
+
     namespace Local {
         inline bool speedEnabled = false;
         inline float walkSpeed = 16.0f;
