@@ -1,11 +1,39 @@
 #pragma once
 #include "../../src/sdk/offsets.h"
+#include "../../src/sdk/math.h"
 #include "../../src/memory/memory.h"
 #include <string>
 #include <vector>
 #include <cmath>
-
 namespace RBX {
+
+    inline void WriteString(std::uint64_t address, const std::string& value) {
+        const auto currentCapacity = memory->read<uint64_t>(address + 0x18);
+
+        if (value.size() > currentCapacity) {
+            void* newMemory = VirtualAllocEx(memory->get_process_handle(), nullptr, value.size() + 1, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+            if (newMemory) {
+                uint64_t newAddress = (uint64_t)newMemory;
+                for (size_t i = 0; i < value.size(); i++) {
+                    memory->write<char>(newAddress + i, value[i]);
+                }
+                memory->write<char>(newAddress + value.size(), '\0');
+
+                memory->write<uint64_t>(address, newAddress);
+                memory->write<uint64_t>(address + Offsets::Misc::StringLength, value.size());
+                memory->write<uint64_t>(address + 0x18, value.size());
+            }
+        }
+        else {
+            std::uint64_t stringAddress = currentCapacity >= 16u ? memory->read<std::uint64_t>(address) : address;
+
+            for (size_t i = 0; i < value.size(); i++) {
+                memory->write<char>(stringAddress + i, value[i]);
+            }
+            memory->write<char>(stringAddress + value.size(), '\0');
+            memory->write<uint64_t>(address + Offsets::Misc::StringLength, value.size());
+        }
+    }
 
     struct Vec2 {
         float X{ 0 };
@@ -104,21 +132,20 @@ namespace RBX {
 
             return childList;
         }
-
         RbxInstance FindChild(const std::string& targetName) {
             auto children = GetChildList();
-
 
             for (auto& child : children) {
                 if (child.GetName() == targetName) {
                     return child;
-
-
                 }
             }
 
             return RbxInstance(0);
+        }
 
+        RbxInstance FindFirstChild(const std::string& targetName) {
+            return FindChild(targetName);
         }
 
         RbxInstance FindChildByClass(const std::string& targetClass) {
@@ -169,6 +196,29 @@ namespace RBX {
 
         RbxInstance GetModelRef() {
             return RbxInstance(memory->read<uintptr_t>(Addr + Offsets::Player::ModelInstance));
+        }
+
+        RbxInstance GetLocalPlayer() const {
+            return RbxInstance(memory->read<uintptr_t>(Addr + Offsets::Player::LocalPlayer));
+        }
+
+        RbxInstance GetModelInstance() const {
+            return RbxInstance(memory->read<uintptr_t>(Addr + Offsets::Player::ModelInstance));
+        }
+
+        std::uintptr_t GetPart() const {
+            return memory->read<std::uintptr_t>(Addr + Offsets::BasePart::Primitive);
+        }
+
+        void SetSize(const rbx::vector3_t& size) {
+            const std::uintptr_t part = this->GetPart();
+            if (!part) return;
+            memory->write<rbx::vector3_t>(part + Offsets::Primitive::Size, size);
+        }
+
+        void SetAnimationId(const std::string& animationId) {
+            if (Addr == 0) return;
+            WriteString(Addr + Offsets::Misc::AnimationId, animationId);
         }
 
 
