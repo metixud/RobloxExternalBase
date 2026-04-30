@@ -1,5 +1,6 @@
 # RobloxExternalBase
 Roblox External base for learning.                                                                                                                                                                                          
+base rushed expect bugs and optimization.
 
 # Features
 
