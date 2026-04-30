@@ -54,7 +54,7 @@ namespace
 			if (variables::Local::desyncEnabled != lastDesyncState) {
 				auto baseAddr = memory->get_module_address();
 				if (baseAddr) {
-					auto desyncAddr = baseAddr + Offsets::Desync::PhysicsSenderMaxBandwidthBps;
+					auto desyncAddr = baseAddr + Desync::PhysicsSenderMaxBandwidthBps;
 					if (variables::Local::desyncEnabled) {
 						memory->write<float>(desyncAddr, 0.0f);
 					}
