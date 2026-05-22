@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 namespace Offsets {
-    inline std::string ClientVersion = "version-9377ee10133e4be3";
+    inline std::string ClientVersion = "version-4b6315bf1f0a4dbb";
 
     namespace AirProperties {
          inline constexpr uintptr_t AirDensity = 0x18;
@@ -12,7 +12,7 @@ namespace Offsets {
     namespace AnimationTrack {
          inline constexpr uintptr_t Animation = 0xd0;
          inline constexpr uintptr_t Animator = 0x118;
-         inline constexpr uintptr_t IsPlaying = 0xa18;
+         inline constexpr uintptr_t IsPlaying = 0xa10;
          inline constexpr uintptr_t Looped = 0xf5;
          inline constexpr uintptr_t Speed = 0xe4;
          inline constexpr uintptr_t TimePosition = 0xe8;
@@ -127,7 +127,7 @@ namespace Offsets {
          inline constexpr uintptr_t PlaceId = 0x1a0;
          inline constexpr uintptr_t PlaceVersion = 0x1bc;
          inline constexpr uintptr_t PrimitiveCount = 0x480;
-         inline constexpr uintptr_t ScriptContext = 0x430;
+         inline constexpr uintptr_t ScriptContext = 0x440;
          inline constexpr uintptr_t ServerIP = 0x620;
          inline constexpr uintptr_t ToRenderView1 = 0x1d8;
          inline constexpr uintptr_t ToRenderView2 = 0x8;
@@ -158,7 +158,7 @@ namespace Offsets {
     }
 
     namespace FakeDataModel {
-         inline constexpr uintptr_t Pointer = 0x74f6758;
+         inline constexpr uintptr_t Pointer = 0x7868a68;
          inline constexpr uintptr_t RealDataModel = 0x1d0;
     }
 
@@ -199,10 +199,10 @@ namespace Offsets {
          inline constexpr uintptr_t HealthDisplayDistance = 0x198;
          inline constexpr uintptr_t HealthDisplayType = 0x19c;
          inline constexpr uintptr_t HipHeight = 0x1a0;
-         inline constexpr uintptr_t HumanoidRootPart = 0x488;
-         inline constexpr uintptr_t HumanoidState = 0x8a8;
+         inline constexpr uintptr_t HumanoidRootPart = 0x480;
+         inline constexpr uintptr_t HumanoidState = 0x8a0;
          inline constexpr uintptr_t HumanoidStateID = 0x20;
-         inline constexpr uintptr_t IsWalking = 0x927;
+         inline constexpr uintptr_t IsWalking = 0x91f;
          inline constexpr uintptr_t Jump = 0x1e6;
          inline constexpr uintptr_t JumpHeight = 0x1ac;
          inline constexpr uintptr_t JumpPower = 0x1b0;
@@ -220,7 +220,7 @@ namespace Offsets {
          inline constexpr uintptr_t Sit = 0x1e9;
          inline constexpr uintptr_t TargetPoint = 0x164;
          inline constexpr uintptr_t UseJumpPower = 0x1ec;
-         inline constexpr uintptr_t WalkTimer = 0x418;
+         inline constexpr uintptr_t WalkTimer = 0x410;
          inline constexpr uintptr_t Walkspeed = 0x1dc;
          inline constexpr uintptr_t WalkspeedCheck = 0x3c4;
     }
@@ -266,7 +266,7 @@ namespace Offsets {
     }
 
     namespace LocalScript {
-         inline constexpr uintptr_t ByteCode = 0x0;
+         inline constexpr uintptr_t ByteCode = 0x1a8;
          inline constexpr uintptr_t GUID = 0xe8;
          inline constexpr uintptr_t Hash = 0x1b8;
     }
@@ -313,7 +313,7 @@ namespace Offsets {
     }
 
     namespace ModuleScript {
-         inline constexpr uintptr_t ByteCode = 0x0;
+         inline constexpr uintptr_t ByteCode = 0x150;
          inline constexpr uintptr_t GUID = 0xe8;
          inline constexpr uintptr_t Hash = 0x160;
          inline constexpr uintptr_t IsCoreScript = 0x0;
@@ -408,8 +408,8 @@ namespace Offsets {
 
     namespace RenderView {
          inline constexpr uintptr_t DeviceD3D11 = 0x8;
-         inline constexpr uintptr_t LightingValid = 0x0;
-         inline constexpr uintptr_t SkyValid = 0x0;
+         inline constexpr uintptr_t LightingValid = 0x150;
+         inline constexpr uintptr_t SkyValid = 0x28d;
          inline constexpr uintptr_t VisualEngine = 0x10;
     }
 
@@ -419,7 +419,7 @@ namespace Offsets {
     }
 
     namespace Script {
-         inline constexpr uintptr_t ByteCode = 0x0;
+         inline constexpr uintptr_t ByteCode = 0x1a8;
          inline constexpr uintptr_t GUID = 0xe8;
          inline constexpr uintptr_t Hash = 0x1b8;
     }
@@ -458,7 +458,7 @@ namespace Offsets {
     }
 
     namespace SpawnLocation {
-         inline constexpr uintptr_t AllowTeamChangeOnTouch = 0x45;
+         inline constexpr uintptr_t AllowTeamChangeOnTouch = 0x1f8;
          inline constexpr uintptr_t Enabled = 0x1f9;
          inline constexpr uintptr_t ForcefieldDuration = 0x1f0;
          inline constexpr uintptr_t Neutral = 0x1fa;
@@ -497,7 +497,7 @@ namespace Offsets {
          inline constexpr uintptr_t JobName = 0x18;
          inline constexpr uintptr_t JobStart = 0xc8;
          inline constexpr uintptr_t MaxFPS = 0xb0;
-         inline constexpr uintptr_t Pointer = 0x7bfe988;
+         inline constexpr uintptr_t Pointer = 0x7f7c478;
     }
 
     namespace Team {
@@ -548,8 +548,8 @@ namespace Offsets {
     namespace VisualEngine {
          inline constexpr uintptr_t Dimensions = 0xaa0;
          inline constexpr uintptr_t FakeDataModel = 0xa80;
-         inline constexpr uintptr_t Pointer = 0x7bd51f8;
-         inline constexpr uintptr_t RenderView = 0xb80;
+         inline constexpr uintptr_t Pointer = 0x7f52cf0;
+         inline constexpr uintptr_t RenderView = 0xb90;
          inline constexpr uintptr_t ViewMatrix = 0x140;
     }
 
@@ -584,6 +584,7 @@ namespace Offsets {
     }
 
 }
+
 namespace Desync {
-    inline constexpr uintptr_t PhysicsSenderMaxBandwidthBps = 0x70b740c;
+    inline constexpr uintptr_t PhysicsSenderMaxBandwidthBps = 0x0;
 }
