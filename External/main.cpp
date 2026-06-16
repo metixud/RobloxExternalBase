@@ -23,8 +23,7 @@ namespace
 
 	bool isgamerunning(const wchar_t* windowTitle)
 	{
-		HWND hwnd = FindWindowW(NULL, windowTitle);
-		return hwnd != NULL;
+		return FindWindowW(nullptr, windowTitle) != nullptr;
 	}
 
 	void thread()
