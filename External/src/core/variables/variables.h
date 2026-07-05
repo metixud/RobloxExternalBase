@@ -3,6 +3,9 @@
 namespace variables {
     inline bool menuOpen = false;
     inline int selectedTab = 0;
+    inline bool waitingForKey = false;
+    inline int* keyToRebind = nullptr;
+    inline bool teamCheck = false;
 
     namespace Aimbot {
         inline bool enabled = false;
@@ -26,6 +29,10 @@ namespace variables {
         inline int snaplinesStyle = 0;
         inline float snaplinesThickness = 1.0f;
         inline bool snaplinesOutline = true;
+        inline bool skeleton = false;
+        inline float skeletonThickness = 2.0f;
+        inline bool skeletonOutline = true;
+        inline bool deadCheck = true;
     }
 
     namespace Exploits {
