@@ -159,6 +159,10 @@ public:
         if (!variables::menuOpen) return;
 
         ImGui::SetNextWindowSize(ImVec2(650, 450), ImGuiCond_FirstUseEver);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 4.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
         ImGui::Begin("Roblox External", &variables::menuOpen, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
 
         ImGui::BeginChild("TabBar", ImVec2(160, 0), true);
@@ -166,38 +170,33 @@ public:
         ImGui::SetCursorPosX(15);
         ImVec2 buttonSize(130, 40);
 
-        if (variables::selectedTab == 0) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.5f, 0.8f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.6f, 0.9f, 1.0f));
-            if (ImGui::Button("Aimbot", buttonSize)) variables::selectedTab = 0;
-            ImGui::PopStyleColor(2);
-        }
-        else {
-            if (ImGui::Button("Aimbot", buttonSize)) variables::selectedTab = 0;
-        }
+        auto DrawTabButton = [](const char* label, int tabIndex, ImVec2 size) {
+            bool isSelected = variables::selectedTab == tabIndex;
 
+            if (isSelected) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.5f, 0.8f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.6f, 0.9f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.4f, 0.7f, 1.0f));
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+            }
+
+            bool clicked = ImGui::Button(label, size);
+            ImGui::PopStyleColor(3);
+
+            if (clicked) variables::selectedTab = tabIndex;
+            };
+
+        DrawTabButton("Aimbot", 0, buttonSize);
         ImGui::SetCursorPosX(15);
-        if (variables::selectedTab == 1) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.5f, 0.8f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.6f, 0.9f, 1.0f));
-            if (ImGui::Button("Visuals", buttonSize)) variables::selectedTab = 1;
-            ImGui::PopStyleColor(2);
-        }
-        else {
-            if (ImGui::Button("Visuals", buttonSize)) variables::selectedTab = 1;
-        }
-
+        DrawTabButton("Visuals", 1, buttonSize);
         ImGui::SetCursorPosX(15);
-        if (variables::selectedTab == 2) {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.5f, 0.8f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.6f, 0.9f, 1.0f));
-            if (ImGui::Button("Local", buttonSize)) variables::selectedTab = 2;
-            ImGui::PopStyleColor(2);
-        }
-        else {
-            if (ImGui::Button("Local", buttonSize)) variables::selectedTab = 2;
-        }
-
+        DrawTabButton("Local", 2, buttonSize);
+        ImGui::SetCursorPosX(15);
+        DrawTabButton("Misc", 3, buttonSize);
 
         ImGui::EndChild();
 
@@ -227,21 +226,85 @@ public:
 
             ImGui::Spacing();
             ImGui::Text("Aimbot Keybind");
-            const char* keys[] = { "None", "Left Mouse", "Right Mouse", "Middle Mouse", "X1 Mouse", "X2 Mouse",
-                                   "Shift", "Ctrl", "Alt", "C", "V", "X", "Z", "Q", "E", "R", "T", "F", "G" };
-            const int keyValues[] = { 0, 1, 2, 4, 5, 6, 16, 17, 18, 0x43, 0x56, 0x58, 0x5A, 0x51, 0x45, 0x52, 0x54, 0x46, 0x47 };
 
-            int currentKeyIndex = 0;
-            for (int i = 0; i < 19; i++) {
-                if (keyValues[i] == variables::Aimbot::aimbotKey) {
-                    currentKeyIndex = i;
-                    break;
+            auto GetKeyName = [](int vk) -> const char* {
+                switch (vk) {
+                case 0: return "None";
+                case VK_LBUTTON: return "LMB";
+                case VK_RBUTTON: return "RMB";
+                case VK_MBUTTON: return "MMB";
+                case VK_XBUTTON1: return "X1";
+                case VK_XBUTTON2: return "X2";
+                case VK_BACK: return "Backspace";
+                case VK_TAB: return "Tab";
+                case VK_RETURN: return "Enter";
+                case VK_SHIFT: return "Shift";
+                case VK_CONTROL: return "Ctrl";
+                case VK_MENU: return "Alt";
+                case VK_CAPITAL: return "CapsLock";
+                case VK_SPACE: return "Space";
+                case VK_LEFT: return "Left";
+                case VK_UP: return "Up";
+                case VK_RIGHT: return "Right";
+                case VK_DOWN: return "Down";
+                default:
+                    if (vk >= 0x30 && vk <= 0x39) {
+                        static char digit[2] = { 0, 0 };
+                        digit[0] = (char)vk;
+                        return digit;
+                    }
+                    if (vk >= 0x41 && vk <= 0x5A) {
+                        static char letter[2] = { 0, 0 };
+                        letter[0] = (char)vk;
+                        return letter;
+                    }
+                    if (vk >= VK_F1 && vk <= VK_F12) {
+                        static char fname[4];
+                        sprintf_s(fname, "F%d", vk - VK_F1 + 1);
+                        return fname;
+                    }
+                    static char buf[16];
+                    sprintf_s(buf, "Key %d", vk);
+                    return buf;
+                }
+                };
+
+            const char* currentKeyName = GetKeyName(variables::Aimbot::aimbotKey);
+
+            if (variables::waitingForKey && variables::keyToRebind == &variables::Aimbot::aimbotKey) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.5f, 0.0f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.6f, 0.1f, 1.0f));
+                ImGui::Button("Press any key... (ESC to cancel)", ImVec2(250, 0));
+                ImGui::PopStyleColor(2);
+
+                if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
+                    variables::waitingForKey = false;
+                    variables::keyToRebind = nullptr;
+                    Sleep(150);
+                }
+                else {
+                    for (int vk = 1; vk <= 254; vk++) {
+                        if (vk == VK_ESCAPE) continue;
+                        if (GetAsyncKeyState(vk) & 0x8000) {
+                            variables::Aimbot::aimbotKey = vk;
+                            variables::waitingForKey = false;
+                            variables::keyToRebind = nullptr;
+                            Sleep(150);
+                            break;
+                        }
+                    }
+                }
+            }
+            else {
+                char buttonText[64];
+                sprintf_s(buttonText, "[ %s ]", currentKeyName);
+                if (ImGui::Button(buttonText, ImVec2(250, 0))) {
+                    variables::waitingForKey = true;
+                    variables::keyToRebind = &variables::Aimbot::aimbotKey;
                 }
             }
 
-            if (ImGui::Combo("##Keybind", &currentKeyIndex, keys, 19)) {
-                variables::Aimbot::aimbotKey = keyValues[currentKeyIndex];
-            }
+            ImGui::Spacing();
         }
         else if (variables::selectedTab == 1) {
             ImGui::Text("Visuals");
@@ -254,30 +317,50 @@ public:
 
             ImGui::Checkbox("Distance", &variables::ESP::distance);
             ImGui::Checkbox("Health Bar", &variables::ESP::healthBar);
-            
+
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();
-            
+
+            ImGui::Checkbox("Dead Check", &variables::ESP::deadCheck);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Skeleton", &variables::ESP::skeleton);
+
+            if (variables::ESP::skeleton) {
+                ImGui::Spacing();
+                ImGui::Text("Skeleton Thickness");
+                ImGui::SliderFloat("##SkeletonThickness", &variables::ESP::skeletonThickness, 0.5f, 5.0f, "%.1f");
+
+                ImGui::Checkbox("Skeleton Outline", &variables::ESP::skeletonOutline);
+                ImGui::Spacing();
+            }
+
+            ImGui::Separator();
+            ImGui::Spacing();
+
             ImGui::Checkbox("Snaplines", &variables::ESP::snaplines);
-            
+
             if (variables::ESP::snaplines) {
                 ImGui::Spacing();
                 ImGui::Text("Origin");
                 const char* origins[] = { "Cursor", "Center", "Top", "Bottom", "Local Head", "Local HRP" };
                 ImGui::Combo("##SnaplinesOrigin", &variables::ESP::snaplinesOrigin, origins, 6);
-                
+
                 ImGui::Text("Destination");
                 const char* destinations[] = { "Head", "HumanoidRootPart", "Closest Part" };
                 ImGui::Combo("##SnaplinesDestination", &variables::ESP::snaplinesDestination, destinations, 3);
-                
+
                 ImGui::Text("Style");
                 const char* styles[] = { "Straight", "Curved", "Dashed" };
                 ImGui::Combo("##SnaplinesStyle", &variables::ESP::snaplinesStyle, styles, 3);
-                
+
                 ImGui::Text("Thickness");
                 ImGui::SliderFloat("##SnaplinesThickness", &variables::ESP::snaplinesThickness, 0.5f, 5.0f, "%.1f");
-                
+
                 ImGui::Checkbox("Outline", &variables::ESP::snaplinesOutline);
             }
         }
@@ -290,11 +373,12 @@ public:
 
             auto localCharacter = Globals::localPlayer.GetModelRef();
             auto humanoid = localCharacter.Addr != 0 ? localCharacter.FindChildByClass("Humanoid") : RBX::RbxInstance(0);
-            
+
             if (humanoid.Addr != 0) {
                 auto data = memory->read<Structs::Humanoid>(humanoid.Addr);
                 ImGui::Text("Current WalkSpeed: %.2f", data.Walkspeed);
-            } else {
+            }
+            else {
                 ImGui::Text("Current WalkSpeed: N/A");
             }
 
@@ -305,10 +389,11 @@ public:
             if (humanoid.Addr != 0) {
                 auto data = memory->read<Structs::Humanoid>(humanoid.Addr);
                 ImGui::Text("Current JumpPower: %.2f", data.JumpPower);
-            } else {
+            }
+            else {
                 ImGui::Text("Current JumpPower: N/A");
             }
-            
+
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();
@@ -371,10 +456,22 @@ public:
                 ImGui::Combo("Swim Animation", &variables::Exploits::swim_animation, swim_anims, IM_ARRAYSIZE(swim_anims));
             }
         }
+        else if (variables::selectedTab == 3) {
+            ImGui::Text("Misc");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Text("Global Settings");
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Team Check", &variables::teamCheck);
+            ImGui::TextWrapped("Want to cheat on ogfn protect? check out discord.gg/ogfncheat.");
+        }
 
         ImGui::EndChild();
 
         ImGui::End();
+        ImGui::PopStyleVar(4);
     }
     void render(ImDrawList* drawList)
     {
