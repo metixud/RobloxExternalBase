@@ -10,12 +10,12 @@ using ViewMatrix_t = rbx::matrix4_t;
 
 // trust ud!
 namespace Structs {
-    inline std::string ClientVersion = "version-4b6315bf1f0a4dbb";
+    inline std::string ClientVersion = "version-5cf2272675e145f5";
 
     struct Humanoid {
         char pad_0[32];
         int HumanoidStateID;
-        char pad_1[252];
+        char pad_1[228];
         uintptr_t SeatPart;
         char pad_2[8];
         uintptr_t MoveToPart;
@@ -26,7 +26,7 @@ namespace Structs {
         Vector3 TargetPoint;
         char pad_5[12];
         Vector3 MoveToPoint;
-        char pad_6[4];
+        char pad_6[16];
         int DisplayDistanceType;
         int FloorMaterial;
         float Health;
@@ -57,7 +57,7 @@ namespace Structs {
         bool RequiresNeck;
         char pad_12[1];
         bool UseJumpPower;
-        char pad_13[471];
+        char pad_13[475];
         float WalkspeedCheck;
         char pad_14[72];
         double WalkTimer;
@@ -67,5 +67,5 @@ namespace Structs {
         int HumanoidState;
         char pad_17[123];
         bool IsWalking;
-    }; // sizeof = 2336
+    }; // sizeof = 2328
 }
