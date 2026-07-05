@@ -24,6 +24,154 @@ namespace Visuals {
         drawList->AddLine(start, end, color, thickness);
     }
 
+    inline void DrawSkeletonBone(ImDrawList* drawList, const RBX::Vec3& pos1, const RBX::Vec3& pos2, 
+                                  const RBX::Mat4& viewMatrix, ImU32 color, float thickness, bool outline) {
+        RBX::Vec2 screenPos1 = W2S::WorldToScreen(pos1, viewMatrix);
+        RBX::Vec2 screenPos2 = W2S::WorldToScreen(pos2, viewMatrix);
+
+        if ((screenPos1.X != 0 || screenPos1.Y != 0) && (screenPos2.X != 0 || screenPos2.Y != 0)) {
+            ImVec2 start(screenPos1.X, screenPos1.Y);
+            ImVec2 end(screenPos2.X, screenPos2.Y);
+            DrawLine(drawList, start, end, color, thickness, outline);
+        }
+    }
+
+    inline void RenderSkeleton(ImDrawList* drawList, RBX::RbxInstance character, 
+                                const RBX::Mat4& viewMatrix, bool isR6) {
+        ImU32 boneColor = IM_COL32(255, 255, 255, 255);
+        float thickness = variables::ESP::skeletonThickness;
+        bool outline = variables::ESP::skeletonOutline;
+
+        if (isR6) {
+            auto head = character.FindChild("Head");
+            auto torso = character.FindChild("Torso");
+            auto leftArm = character.FindChild("Left Arm");
+            auto rightArm = character.FindChild("Right Arm");
+            auto leftLeg = character.FindChild("Left Leg");
+            auto rightLeg = character.FindChild("Right Leg");
+
+            if (head.Addr == 0 || torso.Addr == 0) return;
+
+            RBX::Vec3 headPos = head.GetPos();
+            RBX::Vec3 torsoPos = torso.GetPos();
+
+            DrawSkeletonBone(drawList, headPos, torsoPos, viewMatrix, boneColor, thickness, outline);
+
+            if (leftArm.Addr != 0) {
+                RBX::Vec3 leftArmPos = leftArm.GetPos();
+                DrawSkeletonBone(drawList, torsoPos, leftArmPos, viewMatrix, boneColor, thickness, outline);
+            }
+
+            if (rightArm.Addr != 0) {
+                RBX::Vec3 rightArmPos = rightArm.GetPos();
+                DrawSkeletonBone(drawList, torsoPos, rightArmPos, viewMatrix, boneColor, thickness, outline);
+            }
+
+            if (leftLeg.Addr != 0) {
+                RBX::Vec3 leftLegPos = leftLeg.GetPos();
+                DrawSkeletonBone(drawList, torsoPos, leftLegPos, viewMatrix, boneColor, thickness, outline);
+            }
+
+            if (rightLeg.Addr != 0) {
+                RBX::Vec3 rightLegPos = rightLeg.GetPos();
+                DrawSkeletonBone(drawList, torsoPos, rightLegPos, viewMatrix, boneColor, thickness, outline);
+            }
+        }
+        else {
+            auto head = character.FindChild("Head");
+            auto upperTorso = character.FindChild("UpperTorso");
+            auto lowerTorso = character.FindChild("LowerTorso");
+
+            auto leftUpperArm = character.FindChild("LeftUpperArm");
+            auto leftLowerArm = character.FindChild("LeftLowerArm");
+            auto leftHand = character.FindChild("LeftHand");
+
+            auto rightUpperArm = character.FindChild("RightUpperArm");
+            auto rightLowerArm = character.FindChild("RightLowerArm");
+            auto rightHand = character.FindChild("RightHand");
+
+            auto leftUpperLeg = character.FindChild("LeftUpperLeg");
+            auto leftLowerLeg = character.FindChild("LeftLowerLeg");
+            auto leftFoot = character.FindChild("LeftFoot");
+
+            auto rightUpperLeg = character.FindChild("RightUpperLeg");
+            auto rightLowerLeg = character.FindChild("RightLowerLeg");
+            auto rightFoot = character.FindChild("RightFoot");
+
+            if (head.Addr == 0 || upperTorso.Addr == 0) return;
+
+            RBX::Vec3 headPos = head.GetPos();
+            RBX::Vec3 upperTorsoPos = upperTorso.GetPos();
+
+            DrawSkeletonBone(drawList, headPos, upperTorsoPos, viewMatrix, boneColor, thickness, outline);
+
+            if (lowerTorso.Addr != 0) {
+                RBX::Vec3 lowerTorsoPos = lowerTorso.GetPos();
+                DrawSkeletonBone(drawList, upperTorsoPos, lowerTorsoPos, viewMatrix, boneColor, thickness, outline);
+
+                if (leftUpperArm.Addr != 0) {
+                    RBX::Vec3 leftUpperArmPos = leftUpperArm.GetPos();
+                    DrawSkeletonBone(drawList, upperTorsoPos, leftUpperArmPos, viewMatrix, boneColor, thickness, outline);
+
+                    if (leftLowerArm.Addr != 0) {
+                        RBX::Vec3 leftLowerArmPos = leftLowerArm.GetPos();
+                        DrawSkeletonBone(drawList, leftUpperArmPos, leftLowerArmPos, viewMatrix, boneColor, thickness, outline);
+
+                        if (leftHand.Addr != 0) {
+                            RBX::Vec3 leftHandPos = leftHand.GetPos();
+                            DrawSkeletonBone(drawList, leftLowerArmPos, leftHandPos, viewMatrix, boneColor, thickness, outline);
+                        }
+                    }
+                }
+
+                if (rightUpperArm.Addr != 0) {
+                    RBX::Vec3 rightUpperArmPos = rightUpperArm.GetPos();
+                    DrawSkeletonBone(drawList, upperTorsoPos, rightUpperArmPos, viewMatrix, boneColor, thickness, outline);
+
+                    if (rightLowerArm.Addr != 0) {
+                        RBX::Vec3 rightLowerArmPos = rightLowerArm.GetPos();
+                        DrawSkeletonBone(drawList, rightUpperArmPos, rightLowerArmPos, viewMatrix, boneColor, thickness, outline);
+
+                        if (rightHand.Addr != 0) {
+                            RBX::Vec3 rightHandPos = rightHand.GetPos();
+                            DrawSkeletonBone(drawList, rightLowerArmPos, rightHandPos, viewMatrix, boneColor, thickness, outline);
+                        }
+                    }
+                }
+
+                if (leftUpperLeg.Addr != 0) {
+                    RBX::Vec3 leftUpperLegPos = leftUpperLeg.GetPos();
+                    DrawSkeletonBone(drawList, lowerTorsoPos, leftUpperLegPos, viewMatrix, boneColor, thickness, outline);
+
+                    if (leftLowerLeg.Addr != 0) {
+                        RBX::Vec3 leftLowerLegPos = leftLowerLeg.GetPos();
+                        DrawSkeletonBone(drawList, leftUpperLegPos, leftLowerLegPos, viewMatrix, boneColor, thickness, outline);
+
+                        if (leftFoot.Addr != 0) {
+                            RBX::Vec3 leftFootPos = leftFoot.GetPos();
+                            DrawSkeletonBone(drawList, leftLowerLegPos, leftFootPos, viewMatrix, boneColor, thickness, outline);
+                        }
+                    }
+                }
+
+                if (rightUpperLeg.Addr != 0) {
+                    RBX::Vec3 rightUpperLegPos = rightUpperLeg.GetPos();
+                    DrawSkeletonBone(drawList, lowerTorsoPos, rightUpperLegPos, viewMatrix, boneColor, thickness, outline);
+
+                    if (rightLowerLeg.Addr != 0) {
+                        RBX::Vec3 rightLowerLegPos = rightLowerLeg.GetPos();
+                        DrawSkeletonBone(drawList, rightUpperLegPos, rightLowerLegPos, viewMatrix, boneColor, thickness, outline);
+
+                        if (rightFoot.Addr != 0) {
+                            RBX::Vec3 rightFootPos = rightFoot.GetPos();
+                            DrawSkeletonBone(drawList, rightLowerLegPos, rightFootPos, viewMatrix, boneColor, thickness, outline);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     inline void RenderESP(ImDrawList* drawList, const RBX::Mat4& viewMatrix)
     {
         if (!variables::ESP::enabled) return;
@@ -32,282 +180,51 @@ namespace Visuals {
             if (!plr.isValid) continue;
 
             auto character = RBX::RbxInstance(plr.characterAddr);
-
             auto head = character.FindChild("Head");
-            auto torso = character.FindChild("Torso");
-            auto leftArm = character.FindChild("Left Arm");
-            auto rightArm = character.FindChild("Right Arm");
-            auto leftLeg = character.FindChild("Left Leg");
-            auto rightLeg = character.FindChild("Right Leg");
-
-            bool isR6 = (torso.Addr != 0);
-
-            if (!isR6) {
-                head = character.FindChild("Head");
-                torso = character.FindChild("UpperTorso");
-                leftArm = character.FindChild("LeftHand");
-                rightArm = character.FindChild("RightHand");
-                leftLeg = character.FindChild("LeftFoot");
-                rightLeg = character.FindChild("RightFoot");
-            }
-
+            
             if (head.Addr == 0) continue;
 
-            RBX::Vec3 boundPoints[200];
-            int boundPointCount = 0;
+            auto torso = character.FindChild("Torso");
+            bool isR6 = (torso.Addr != 0);
 
-            if (isR6) {
-                auto headPos = head.GetPos();
-                const float headSize = 1.0f;
-                for (int i = 0; i < 8; i++) {
-                    float angle = (i / 8.0f) * 6.28318f;
-                    boundPoints[boundPointCount++] = { headPos.X + cosf(angle) * headSize, headPos.Y, headPos.Z + sinf(angle) * headSize };
-                }
-                boundPoints[boundPointCount++] = { headPos.X, headPos.Y + headSize, headPos.Z };
-                boundPoints[boundPointCount++] = { headPos.X, headPos.Y - headSize * 0.5f, headPos.Z };
+            RBX::RbxInstance hrp = character.FindChild("HumanoidRootPart");
+            if (hrp.Addr == 0) continue;
 
-                if (torso.Addr != 0) {
-                    auto torsoCF = torso.GetCFrame();
-                    auto torsoPos = torsoCF.GetPosition();
-                    auto torsoRight = torsoCF.GetRightVector();
-                    auto torsoUp = torsoCF.GetUpVector();
-                    auto torsoLook = torsoCF.GetLookVector();
-                    const float torsoW = 2.0f, torsoH = 2.0f, torsoD = 1.0f;
+            if (hrp.Addr == 0) continue;
 
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    torsoPos.X + torsoRight.X * (x * torsoW * 0.5f) + torsoUp.X * (y * torsoH * 0.5f) + torsoLook.X * (z * torsoD * 0.5f),
-                                    torsoPos.Y + torsoRight.Y * (x * torsoW * 0.5f) + torsoUp.Y * (y * torsoH * 0.5f) + torsoLook.Y * (z * torsoD * 0.5f),
-                                    torsoPos.Z + torsoRight.Z * (x * torsoW * 0.5f) + torsoUp.Z * (y * torsoH * 0.5f) + torsoLook.Z * (z * torsoD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
+            RBX::Vec3 headPos = head.GetPos();
+            RBX::Vec3 hrpPos = hrp.GetPos();
 
-                const float armW = 1.0f, armH = 2.0f, armD = 1.0f;
-                if (rightArm.Addr != 0) {
-                    auto armCF = rightArm.GetCFrame();
-                    auto armPos = armCF.GetPosition();
-                    auto armRight = armCF.GetRightVector();
-                    auto armUp = armCF.GetUpVector();
-                    auto armLook = armCF.GetLookVector();
+            RBX::Vec2 headScreen = W2S::WorldToScreen(headPos, viewMatrix);
+            RBX::Vec2 hrpScreen = W2S::WorldToScreen(hrpPos, viewMatrix);
 
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    armPos.X + armRight.X * (x * armW * 0.5f) + armUp.X * (y * armH * 0.5f) + armLook.X * (z * armD * 0.5f),
-                                    armPos.Y + armRight.Y * (x * armW * 0.5f) + armUp.Y * (y * armH * 0.5f) + armLook.Y * (z * armD * 0.5f),
-                                    armPos.Z + armRight.Z * (x * armW * 0.5f) + armUp.Z * (y * armH * 0.5f) + armLook.Z * (z * armD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
+            if ((headScreen.X == 0 && headScreen.Y == 0) || (hrpScreen.X == 0 && hrpScreen.Y == 0)) continue;
 
-                if (leftArm.Addr != 0) {
-                    auto armCF = leftArm.GetCFrame();
-                    auto armPos = armCF.GetPosition();
-                    auto armRight = armCF.GetRightVector();
-                    auto armUp = armCF.GetUpVector();
-                    auto armLook = armCF.GetLookVector();
+            float headYOffset = isR6 ? 0.5f : 0.5f;
+            float feetYOffset = isR6 ? 3.0f : 2.5f;
+            
+            RBX::Vec3 topPos = { headPos.X, headPos.Y + headYOffset, headPos.Z };
+            RBX::Vec3 bottomPos = { hrpPos.X, hrpPos.Y - feetYOffset, hrpPos.Z };
+            
+            RBX::Vec2 topScreen = W2S::WorldToScreen(topPos, viewMatrix);
+            RBX::Vec2 bottomScreen = W2S::WorldToScreen(bottomPos, viewMatrix);
 
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    armPos.X + armRight.X * (x * armW * 0.5f) + armUp.X * (y * armH * 0.5f) + armLook.X * (z * armD * 0.5f),
-                                    armPos.Y + armRight.Y * (x * armW * 0.5f) + armUp.Y * (y * armH * 0.5f) + armLook.Y * (z * armD * 0.5f),
-                                    armPos.Z + armRight.Z * (x * armW * 0.5f) + armUp.Z * (y * armH * 0.5f) + armLook.Z * (z * armD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
+            if ((topScreen.X == 0 && topScreen.Y == 0) || (bottomScreen.X == 0 && bottomScreen.Y == 0)) continue;
 
-                const float legW = 1.0f, legH = 2.0f, legD = 1.0f;
-                if (rightLeg.Addr != 0) {
-                    auto legCF = rightLeg.GetCFrame();
-                    auto legPos = legCF.GetPosition();
-                    auto legRight = legCF.GetRightVector();
-                    auto legUp = legCF.GetUpVector();
-                    auto legLook = legCF.GetLookVector();
+            float height = bottomScreen.Y - topScreen.Y;
+            float width = height * 0.4f;
 
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    legPos.X + legRight.X * (x * legW * 0.5f) + legUp.X * (y * legH * 0.6f) + legLook.X * (z * legD * 0.5f),
-                                    legPos.Y + legRight.Y * (x * legW * 0.5f) + legUp.Y * (y * legH * 0.6f) + legLook.Y * (z * legD * 0.5f),
-                                    legPos.Z + legRight.Z * (x * legW * 0.5f) + legUp.Z * (y * legH * 0.6f) + legLook.Z * (z * legD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (leftLeg.Addr != 0) {
-                    auto legCF = leftLeg.GetCFrame();
-                    auto legPos = legCF.GetPosition();
-                    auto legRight = legCF.GetRightVector();
-                    auto legUp = legCF.GetUpVector();
-                    auto legLook = legCF.GetLookVector();
-
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    legPos.X + legRight.X * (x * legW * 0.5f) + legUp.X * (y * legH * 0.6f) + legLook.X * (z * legD * 0.5f),
-                                    legPos.Y + legRight.Y * (x * legW * 0.5f) + legUp.Y * (y * legH * 0.6f) + legLook.Y * (z * legD * 0.5f),
-                                    legPos.Z + legRight.Z * (x * legW * 0.5f) + legUp.Z * (y * legH * 0.6f) + legLook.Z * (z * legD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                auto headPos = head.GetPos();
-                const float headSize = 0.8f;
-                for (int i = 0; i < 8; i++) {
-                    float angle = (i / 8.0f) * 6.28318f;
-                    boundPoints[boundPointCount++] = { headPos.X + cosf(angle) * headSize, headPos.Y, headPos.Z + sinf(angle) * headSize };
-                }
-                boundPoints[boundPointCount++] = { headPos.X, headPos.Y + headSize, headPos.Z };
-                boundPoints[boundPointCount++] = { headPos.X, headPos.Y - headSize * 0.5f, headPos.Z };
-
-                if (torso.Addr != 0) {
-                    auto torsoCF = torso.GetCFrame();
-                    auto torsoPos = torsoCF.GetPosition();
-                    auto torsoRight = torsoCF.GetRightVector();
-                    auto torsoUp = torsoCF.GetUpVector();
-                    auto torsoLook = torsoCF.GetLookVector();
-                    const float utW = 1.6f, utH = 1.5f, utD = 0.8f;
-
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    torsoPos.X + torsoRight.X * (x * utW * 0.5f) + torsoUp.X * (y * utH * 0.5f) + torsoLook.X * (z * utD * 0.5f),
-                                    torsoPos.Y + torsoRight.Y * (x * utW * 0.5f) + torsoUp.Y * (y * utH * 0.5f) + torsoLook.Y * (z * utD * 0.5f),
-                                    torsoPos.Z + torsoRight.Z * (x * utW * 0.5f) + torsoUp.Z * (y * utH * 0.5f) + torsoLook.Z * (z * utD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                const float handW = 0.8f, handH = 0.8f, handD = 0.8f;
-                if (rightArm.Addr != 0) {
-                    auto handCF = rightArm.GetCFrame();
-                    auto handPos = handCF.GetPosition();
-                    auto handRight = handCF.GetRightVector();
-                    auto handUp = handCF.GetUpVector();
-                    auto handLook = handCF.GetLookVector();
-
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    handPos.X + handRight.X * (x * handW * 0.5f) + handUp.X * (y * handH * 0.5f) + handLook.X * (z * handD * 0.5f),
-                                    handPos.Y + handRight.Y * (x * handW * 0.5f) + handUp.Y * (y * handH * 0.5f) + handLook.Y * (z * handD * 0.5f),
-                                    handPos.Z + handRight.Z * (x * handW * 0.5f) + handUp.Z * (y * handH * 0.5f) + handLook.Z * (z * handD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (leftArm.Addr != 0) {
-                    auto handCF = leftArm.GetCFrame();
-                    auto handPos = handCF.GetPosition();
-                    auto handRight = handCF.GetRightVector();
-                    auto handUp = handCF.GetUpVector();
-                    auto handLook = handCF.GetLookVector();
-
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    handPos.X + handRight.X * (x * handW * 0.5f) + handUp.X * (y * handH * 0.5f) + handLook.X * (z * handD * 0.5f),
-                                    handPos.Y + handRight.Y * (x * handW * 0.5f) + handUp.Y * (y * handH * 0.5f) + handLook.Y * (z * handD * 0.5f),
-                                    handPos.Z + handRight.Z * (x * handW * 0.5f) + handUp.Z * (y * handH * 0.5f) + handLook.Z * (z * handD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                const float footW = 0.8f, footH = 0.7f, footD = 1.2f;
-                if (rightLeg.Addr != 0) {
-                    auto footCF = rightLeg.GetCFrame();
-                    auto footPos = footCF.GetPosition();
-                    auto footRight = footCF.GetRightVector();
-                    auto footUp = footCF.GetUpVector();
-                    auto footLook = footCF.GetLookVector();
-
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    footPos.X + footRight.X * (x * footW * 0.5f) + footUp.X * (y * footH * 0.5f) + footLook.X * (z * footD * 0.5f),
-                                    footPos.Y + footRight.Y * (x * footW * 0.5f) + footUp.Y * (y * footH * 0.5f) + footLook.Y * (z * footD * 0.5f),
-                                    footPos.Z + footRight.Z * (x * footW * 0.5f) + footUp.Z * (y * footH * 0.5f) + footLook.Z * (z * footD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-
-                if (leftLeg.Addr != 0) {
-                    auto footCF = leftLeg.GetCFrame();
-                    auto footPos = footCF.GetPosition();
-                    auto footRight = footCF.GetRightVector();
-                    auto footUp = footCF.GetUpVector();
-                    auto footLook = footCF.GetLookVector();
-
-                    for (int x = -1; x <= 1; x += 2) {
-                        for (int y = -1; y <= 1; y += 2) {
-                            for (int z = -1; z <= 1; z += 2) {
-                                boundPoints[boundPointCount++] = {
-                                    footPos.X + footRight.X * (x * footW * 0.5f) + footUp.X * (y * footH * 0.5f) + footLook.X * (z * footD * 0.5f),
-                                    footPos.Y + footRight.Y * (x * footW * 0.5f) + footUp.Y * (y * footH * 0.5f) + footLook.Y * (z * footD * 0.5f),
-                                    footPos.Z + footRight.Z * (x * footW * 0.5f) + footUp.Z * (y * footH * 0.5f) + footLook.Z * (z * footD * 0.5f)
-                                };
-                            }
-                        }
-                    }
-                }
-            }
-
-            float minX = 999999.0f, minY = 999999.0f;
-            float maxX = -999999.0f, maxY = -999999.0f;
-            int validPoints = 0;
-
-            for (int i = 0; i < boundPointCount; i++) {
-                RBX::Vec2 screenPos = W2S::WorldToScreen(boundPoints[i], viewMatrix);
-                if (screenPos.X != 0 || screenPos.Y != 0) {
-                    minX = (std::min)(minX, screenPos.X);
-                    minY = (std::min)(minY, screenPos.Y);
-                    maxX = (std::max)(maxX, screenPos.X);
-                    maxY = (std::max)(maxY, screenPos.Y);
-                    validPoints++;
-                }
-            }
-
-            if (validPoints < 3 || minX == 999999.0f) continue;
-
-            float boxWidth = maxX - minX;
-            float boxHeight = maxY - minY;
+            float minX = topScreen.X - width / 2.0f;
+            float minY = topScreen.Y;
+            float maxX = topScreen.X + width / 2.0f;
+            float maxY = bottomScreen.Y;
 
             ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-            const float MAX_BOX_WIDTH = screenSize.x * 1.5f;
-            const float MAX_BOX_HEIGHT = screenSize.y * 1.5f;
+            if (minX < -500 || minY < -500 || maxX > screenSize.x + 500 || maxY > screenSize.y + 500) continue;
 
-            if (boxWidth > MAX_BOX_WIDTH || boxHeight > MAX_BOX_HEIGHT) continue;
+            if (variables::ESP::skeleton) {
+                RenderSkeleton(drawList, character, viewMatrix, isR6);
+            }
 
             if (variables::ESP::boxes) {
                 drawList->AddRect(
@@ -416,27 +333,21 @@ namespace Visuals {
 
                 switch (variables::ESP::snaplinesDestination) {
                 case 0: {
-                    auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
-                    destination_pos = ImVec2(headPos.X, headPos.Y);
+                    RBX::Vec2 headScreenPos = W2S::WorldToScreen(headPos, viewMatrix);
+                    destination_pos = ImVec2(headScreenPos.X, headScreenPos.Y);
                     break;
                 }
                 case 1: {
-                    auto hrp = character.FindChild("HumanoidRootPart");
-                    if (hrp.Addr != 0) {
-                        auto hrpPos = W2S::WorldToScreen(hrp.GetPos(), viewMatrix);
-                        destination_pos = ImVec2(hrpPos.X, hrpPos.Y);
-                    } else {
-                        auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
-                        destination_pos = ImVec2(headPos.X, headPos.Y);
-                    }
+                    RBX::Vec2 hrpScreenPos = W2S::WorldToScreen(hrpPos, viewMatrix);
+                    destination_pos = ImVec2(hrpScreenPos.X, hrpScreenPos.Y);
                     break;
                 }
                 case 2: {
                     ImVec2 best = ImVec2((minX + maxX) * 0.5f, (minY + maxY) * 0.5f);
                     float closest = FLT_MAX;
                     
-                    auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
-                    ImVec2 headScreen = ImVec2(headPos.X, headPos.Y);
+                    RBX::Vec2 headScreenPos = W2S::WorldToScreen(headPos, viewMatrix);
+                    ImVec2 headScreen = ImVec2(headScreenPos.X, headScreenPos.Y);
                     auto delta = ImVec2(origin_pos.x - headScreen.x, origin_pos.y - headScreen.y);
                     float distance = delta.x * delta.x + delta.y * delta.y;
                     if (distance < closest) {
@@ -444,23 +355,21 @@ namespace Visuals {
                         best = headScreen;
                     }
 
-                    if (torso.Addr != 0) {
-                        auto torsoPos = W2S::WorldToScreen(torso.GetPos(), viewMatrix);
-                        ImVec2 torsoScreen = ImVec2(torsoPos.X, torsoPos.Y);
-                        delta = ImVec2(origin_pos.x - torsoScreen.x, origin_pos.y - torsoScreen.y);
-                        distance = delta.x * delta.x + delta.y * delta.y;
-                        if (distance < closest) {
-                            closest = distance;
-                            best = torsoScreen;
-                        }
+                    RBX::Vec2 hrpScreenPos2 = W2S::WorldToScreen(hrpPos, viewMatrix);
+                    ImVec2 hrpScreen = ImVec2(hrpScreenPos2.X, hrpScreenPos2.Y);
+                    delta = ImVec2(origin_pos.x - hrpScreen.x, origin_pos.y - hrpScreen.y);
+                    distance = delta.x * delta.x + delta.y * delta.y;
+                    if (distance < closest) {
+                        closest = distance;
+                        best = hrpScreen;
                     }
 
                     destination_pos = best;
                     break;
                 }
                 default: {
-                    auto headPos = W2S::WorldToScreen(head.GetPos(), viewMatrix);
-                    destination_pos = ImVec2(headPos.X, headPos.Y);
+                    RBX::Vec2 headScreenPos = W2S::WorldToScreen(headPos, viewMatrix);
+                    destination_pos = ImVec2(headScreenPos.X, headScreenPos.Y);
                     break;
                 }
                 }
