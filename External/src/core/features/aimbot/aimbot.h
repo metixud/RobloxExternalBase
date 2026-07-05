@@ -67,6 +67,8 @@ namespace Aimbot {
             for (auto& plr : PlayerCache::players) {
                 if (!plr.isValid) continue;
 
+                if (variables::teamCheck && plr.teamAddr != 0 && plr.teamAddr == PlayerCache::localPlayerTeam) continue;
+
                 auto character = RBX::RbxInstance(plr.characterAddr);
                 RBX::RbxInstance targetPart = RBX::RbxInstance(0);
 
@@ -106,6 +108,11 @@ namespace Aimbot {
             for (auto& plr : PlayerCache::players) {
                 if (!plr.isValid) continue;
                 if (plr.playerAddr != lockedPlayerAddr) continue;
+
+                if (variables::teamCheck && plr.teamAddr != 0 && plr.teamAddr == PlayerCache::localPlayerTeam) {
+                    lockedPlayerAddr = 0;
+                    return;
+                }
 
                 auto character = RBX::RbxInstance(plr.characterAddr);
                 RBX::RbxInstance targetPart = RBX::RbxInstance(0);
