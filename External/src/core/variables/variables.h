@@ -53,4 +53,8 @@ namespace variables {
         inline float jumpPower = 50.0f;
         inline bool desyncEnabled = false;
     }
+
+    namespace Misc {
+        inline bool streamProof = false;
+    }
 }
