@@ -10,6 +10,7 @@
 #include "../../src/memory/memory.h"
 #include "../../src/sdk/offsets.h"
 #include "../../src/sdk/structs.h"
+#include "../../src/sdk/window_manager.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -143,11 +144,20 @@ public:
             DispatchMessage(&msg);
         }
 
+        WindowManager::UpdateRobloxWindowInfo();
+        WindowManager::AdjustOverlayPosition(windowHandle);
+
         if (variables::menuOpen) {
             SetWindowLong(windowHandle, GWL_EXSTYLE, WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
         }
         else {
             SetWindowLong(windowHandle, GWL_EXSTYLE, WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
+        }
+
+        if (variables::Misc::streamProof) {
+            SetWindowDisplayAffinity(windowHandle, WDA_EXCLUDEFROMCAPTURE);
+        } else {
+            SetWindowDisplayAffinity(windowHandle, WDA_NONE);
         }
 
         ImGui_ImplDX11_NewFrame();
@@ -465,6 +475,14 @@ public:
             ImGui::Spacing();
 
             ImGui::Checkbox("Team Check", &variables::teamCheck);
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Stream Proof", &variables::Misc::streamProof);
+            
+            ImGui::Spacing();
             ImGui::TextWrapped("Want to cheat on ogfn protect? check out discord.gg/ogfncheat.");
         }
 
